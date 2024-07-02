@@ -2,68 +2,68 @@ import os
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 
-# Cadena de conexión para el servicio de Blob Storage de Azure
-connection_string = 'credenciales_almacenamientoAzure'
+# Connection string for Azure Blob Storage service
+connection_string = 'your_azure_storage_credentials'
 blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-def crear_contenedor(nombre_contenedor):
+def create_container(container_name):
     try:
-        container_client = blob_service_client.create_container(nombre_contenedor)
-        print(f'Contenedor {nombre_contenedor} creado exitosamente.')
+        container_client = blob_service_client.create_container(container_name)
+        print(f'Container {container_name} created successfully.')
     except ResourceExistsError:
-        print(f'El contenedor {nombre_contenedor} ya existe.')
+        print(f'The container {container_name} already exists.')
 
-def listar_contenedores():
+def list_containers():
     containers = blob_service_client.list_containers()
-    containers_list = list(containers)  # Convierte el iterador en una lista para poder contar sus elementos
+    containers_list = list(containers)  # Convert iterator to list to count its elements
 
     if containers_list:
-        print("Contenedores dentro:")
+        print("Containers inside:")
         for container in containers_list:
             print(container['name'])
     else:
-        print("No hay contenedores.")
+        print("No containers found.")
 
-def cargar_blob(nombre_contenedor, ruta_archivo):
+def upload_blob(container_name, file_path):
     try:
-        blob_client = blob_service_client.get_blob_client(container=nombre_contenedor, blob=os.path.basename(ruta_archivo))
-        with open(ruta_archivo, 'rb') as data:
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=os.path.basename(file_path))
+        with open(file_path, 'rb') as data:
             blob_client.upload_blob(data)
-        print(f'Archivo {ruta_archivo} cargado en {nombre_contenedor}.')
+        print(f'File {file_path} uploaded to {container_name}.')
     except ResourceNotFoundError:
-        print(f'Contenedor {nombre_contenedor} no encontrado.')
+        print(f'Container {container_name} not found.')
 
-def listar_blobs(nombre_contenedor):
+def list_blobs(container_name):
     try:
-        container_client = blob_service_client.get_container_client(nombre_contenedor)
+        container_client = blob_service_client.get_container_client(container_name)
         blobs = container_client.list_blobs()
         for blob in blobs:
             print(blob.name)
     except ResourceNotFoundError:
-        print(f'Contenedor {nombre_contenedor} no encontrado.')
+        print(f'Container {container_name} not found.')
 
-def descargar_blob(nombre_contenedor, nombre_blob, ruta_descarga):
+def download_blob(container_name, blob_name, download_path):
     try:
-        blob_client = blob_service_client.get_blob_client(container=nombre_contenedor, blob=nombre_blob)
-        with open(ruta_descarga, 'wb') as download_file:
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+        with open(download_path, 'wb') as download_file:
             download_file.write(blob_client.download_blob().readall())
-        print(f'Blob {nombre_blob} descargado en {ruta_descarga}.')
+        print(f'Blob {blob_name} downloaded to {download_path}.')
     except ResourceNotFoundError:
-        print(f'Blob {nombre_blob} o contenedor {nombre_contenedor} no encontrado.')
+        print(f'Blob {blob_name} or container {container_name} not found.')
 
-def eliminar_contenedor(nombre_contenedor):
+def delete_container(container_name):
     try:
-        blob_service_client.delete_container(nombre_contenedor)
-        print(f'Contenedor {nombre_contenedor} eliminado exitosamente.')
+        blob_service_client.delete_container(container_name)
+        print(f'Container {container_name} deleted successfully.')
     except ResourceNotFoundError:
-        print(f'Contenedor {nombre_contenedor} no encontrado.')
+        print(f'Container {container_name} not found.')
 
-# Uso del ejemplo
+# Example usage
 if __name__ == "__main__":
-    crear_contenedor('contenedorjose3')
-    crear_contenedor('contenedorjose4')
-    listar_contenedores()
-    cargar_blob('contenedorjose3', 'C:\\archivoAzure\\archivo1.txt')
-    listar_blobs('contenedorjose3')
-    descargar_blob('contenedorjose3', 'archivo1.txt', 'C:\\descargas\\archivo1.txt')
-    eliminar_contenedor('contenedorjose2')
+    create_container('containerjose1')
+    create_container('containerjose2')
+    list_containers()
+    upload_blob('containerjose1', 'C:\\archivoAzure\\archivo1.txt')
+    list_blobs('containerjose1')
+    download_blob('containerjose1', 'archivo1.txt', 'C:\\descargas\\archivo1.txt')
+    delete_container('containerjose1')
